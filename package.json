@@ -1,0 +1,48 @@
+{
+  "name": "CENI",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build-watch": "parcel watch ./client/index.html",
+    "start-watch": "nodemon server/index.js",
+    "dev": "concurrently --kill-others \"npm run start-watch\" \"npm run build-watch\"",
+    "build": "parcel build ./client/index.html",
+    "start": "npm run build && node server/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tosinoni/CENI.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tosinoni/CENI/issues"
+  },
+  "homepage": "https://github.com/tosinoni/CENI#readme",
+  "dependencies": {
+    "bootstrap": "^4.3.1",
+    "chart.js": "^2.8.0",
+    "express": "^4.17.1",
+    "node-sass": "^4.12.0",
+    "react": "^16.8.6",
+    "react-chartjs": "^1.2.0",
+    "react-chartjs-2": "^2.7.6",
+    "react-dom": "^16.8.6",
+    "react-router-dom": "^5.0.1",
+    "reactstrap": "^8.0.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^9.0.0",
+    "availity-reactstrap-validation": "^2.5.4",
+    "babel-core": "^6.26.3",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "concurrently": "^4.1.0",
+    "nodemon": "^1.19.1",
+    "parcel-bundler": "^1.12.3"
+  }
+}

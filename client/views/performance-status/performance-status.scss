@@ -1,0 +1,21 @@
+.performance-status{
+    padding: 5px;
+
+    .header-content {
+        position: relative;
+
+        .header-content-button {
+            position: absolute;
+            right: 10px;
+            top: 15px;
+        }
+
+        .header-content-text {
+            padding: 10px;
+        }
+    }
+
+    .row {
+        padding: 10px;
+    }
+}
