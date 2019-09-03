@@ -9,7 +9,7 @@ ul {
 }
 
 li {
-    list-style: 'none';
+    list-style: none;
 }
 
 a {
@@ -19,4 +19,13 @@ a {
 .navbar-brand {
     display: flex;
     align-items: center;
+}
+
+html, body {
+    height: 100%;
+    margin: 0px;
+}
+
+.root {
+    height: 100%;
 }

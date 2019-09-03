@@ -1,12 +1,6 @@
 import React, { Component } from 'react';
-import { Line, Bar } from "react-chartjs-2";
-
 import {
   Button,
-  Card,
-  CardHeader,
-  CardBody,
-  CardTitle,
   Row,
   Col,
   Modal,
@@ -15,18 +9,15 @@ import {
   ModalFooter
 } from "reactstrap";
 
-import {
-  chartExample1,
-  chartExample2,
-  chartExample3,
-  chartExample4
-} from "./charts-data";
 import './performance-status.scss'
-import { AvForm, AvField } from 'availity-reactstrap-validation';
 
-
-const NES = ['6500', 'WaveServer', '8700', 'DTN']
-const ports = ['4/1', '4/2', '2/5', '2/6']
+import { isEmpty } from 'lodash'
+import PerformanceStatusForm from '../../components/performance-status-form/performance-status-form'
+import PerformanceStatusView from '../../components/performance-status-view/performance-status-view'
+import { NES, GRAPH_TYPES } from '../../constants/performance-status'
+import httpClient from '../../httpClient'
+import request from 'request'
+import Swal from 'sweetalert2'
 
 class PerformanceStatus extends Component {
   constructor(props) {
@@ -34,24 +25,103 @@ class PerformanceStatus extends Component {
 
     this.state = {
       isModalOpen: false,
+      chartData: []
     }
 
     this.toggleModal = this.toggleModal.bind(this)
-    this.handleValidSubmit = this.handleValidSubmit.bind(this);
-    this.handleInvalidSubmit = this.handleInvalidSubmit.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleModalDataChange = this.handleModalDataChange.bind(this)
+    this.onDeleteData = this.onDeleteData.bind(this)
   }
 
-  toggleModal() {
+  componentDidMount() {
+    httpClient.getAllData().then(performanceStatus => {
+      if (performanceStatus && performanceStatus.success) {
+        this.setState({ chartData: performanceStatus.data })
+      }
+    })
+  }
+  toggleModal(evt, modalData) {
     const isModalOpen = !this.state.isModalOpen
-    this.setState({ isModalOpen })
+
+    if (isEmpty(modalData)) {
+      modalData = {
+        networkElement: NES[0].value,
+        networkElementSelection: NES[0],
+        type: GRAPH_TYPES[0].value,
+        graphTypeSelection: GRAPH_TYPES[0]
+      }
+    }
+    this.setState({ isModalOpen, modalData })
   }
 
-  handleValidSubmit(event, values) {
-    this.setState({ email: values.email });
+  handleSubmit() {
+    console.log(this.state.modalData)
+    // console.log(process.env)
+
+    // console.log(process.env.NODE_TLS_REJECT_UNAUTHORIZED)
+
+    // const formData = {
+    //   "queryType" : "SQL",
+    //   "query" : " select * from  dfs.`/tmp/35575e87-8893-41fd-9d9c-e65ece5ff33c` limit 10"
+    // };
+
+    // request.post(
+    //   {
+    //     url: 'https://10.181.39.1:8443/gateway/default/drill/query.json',
+    //     form: formData
+    //   },
+    //   function (err, httpResponse, body) {
+    //     console.log(err, body);
+    //   }
+    // );
+    httpClient.addData(this.state.modalData).then(res => {
+      if (res && res.success) {
+        const chartData = this.state.chartData
+        chartData.push(res.data)
+
+        console.log(chartData)
+        this.setState({ chartData })
+        this.toggleModal()
+      }
+    })
   }
 
-  handleInvalidSubmit(event, errors, values) {
-    this.setState({ email: values.email, error: true });
+  getDate(moment) {
+    return moment && moment.toDate ? moment.toDate() : ''
+  }
+
+
+  handleModalDataChange(key, option, isDate) {
+    const modalData = this.state.modalData
+
+    modalData[key] = !isDate ? option.value : this.getDate(option)
+    modalData[`${key}Selection`] = option
+
+
+    this.setState({ modalData })
+  }
+
+  onDeleteData(data) {
+    httpClient.deleteData(data._id).then(res => {
+      if (res && res.success) {
+        const chartData = this.state.chartData
+
+        chartData.find((o, i) => {
+          if (o._id === data._id) {
+            chartData.splice(i, 1)
+            return true
+          }
+          return false
+        })
+
+        this.setState({ chartData })
+        Swal('Done', 'Chart removed successfully', 'success')
+
+      } else {
+        Swal('Oops', res.error, 'error')
+      }
+    })
   }
 
   render() {
@@ -63,102 +133,28 @@ class PerformanceStatus extends Component {
         </div>
 
         <Row>
-          <Col lg="4">
-            <Card className="card-chart">
-              <CardHeader>
-                <h5 className="card-category">Total Shipments</h5>
-                <CardTitle tag="h3">
-                  <i className="tim-icons icon-bell-55 text-info" />{" "}
-                  763,215
-                  </CardTitle>
-              </CardHeader>
-              <CardBody>
-                <div className="chart-area">
-                  <Line
-                    data={chartExample2.data}
-                    options={chartExample2.options}
-                  />
-                </div>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col lg="4">
-            <Card className="card-chart">
-              <CardHeader>
-                <h5 className="card-category">Daily Sales</h5>
-                <CardTitle tag="h3">
-                  <i className="tim-icons icon-delivery-fast text-primary" />{" "}
-                  3,500€
-                  </CardTitle>
-              </CardHeader>
-              <CardBody>
-                <div className="chart-area">
-                  <Bar
-                    data={chartExample3.data}
-                    options={chartExample3.options}
-                  />
-                </div>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col lg="4">
-            <Card className="card-chart">
-              <CardHeader>
-                <h5 className="card-category">Completed Tasks</h5>
-                <CardTitle tag="h3">
-                  <i className="tim-icons icon-send text-success" /> 12,100K
-                  </CardTitle>
-              </CardHeader>
-              <CardBody>
-                <div className="chart-area">
-                  <Line
-                    data={chartExample4.data}
-                    options={chartExample4.options}
-                  />
-                </div>
-              </CardBody>
-            </Card>
-          </Col>
+          {this.state.chartData.map((data, key) => {
+            return (
+              <Col lg="4" key={key} className="chartData">
+                <PerformanceStatusView data={data} onDeleteData={this.onDeleteData} />
+              </Col>
+            )
+          })}
         </Row>
 
         <Modal isOpen={this.state.isModalOpen} toggle={this.toggleModal}>
           <ModalHeader toggle={this.toggleModal}>Add Entry</ModalHeader>
-          <AvForm onValidSubmit={this.handleValidSubmit} onInvalidSubmit={this.handleInvalidSubmit}>
-
-            <ModalBody>
-              <Row>
-                <Col className="pr-md-1" md="8">
-                  <AvField type="select" name="select-ne" label="Network Element: ">
-                    {NES.map(ne => <option value={ne} key={ne}>{ne}</option>)}
-                  </AvField>
-                </Col>
-              </Row>
-              <Row>
-                <Col className="pr-md-1" md="8">
-                  <AvField type="select" name="select-port" label="Port: ">
-                    {ports.map(port => <option value={port} key={port}>{port}</option>)}
-                  </AvField>
-                </Col>
-              </Row>
-              <Row>
-                <Col className="pr-md-1" md="8">
-                </Col>
-              </Row>
-              <Row>
-                <Col className="pr-md-1" md="8">
-                </Col>
-              </Row>
-            </ModalBody>
-            <ModalFooter>
-              <Button color="secondary" onClick={this.toggleModal}>
-                Cancel
+          <ModalBody>
+            <PerformanceStatusForm data={this.state.modalData} onChange={this.handleModalDataChange} />
+          </ModalBody>
+          <ModalFooter>
+            <Button color="secondary" onClick={this.toggleModal}>
+              Cancel
             </Button>{' '}
-              <Button color="primary" type="submit">
-                Submit
+            <Button color="primary" type="submit" onClick={e => this.handleSubmit(e)}>
+              Submit
             </Button>
-            </ModalFooter>
-          </AvForm>
-
+          </ModalFooter>
         </Modal>
       </div>
     );

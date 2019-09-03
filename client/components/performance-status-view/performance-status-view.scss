@@ -1,0 +1,11 @@
+.card-chart {
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        
+        .card-title {
+            color: dimgray;
+        }
+    }
+}
